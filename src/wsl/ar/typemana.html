@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>分类管理</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/popper.js/1.12.5/umd/popper.min.js"></script>
+  <script src="https://cdn.bootcss.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+  <style type="text/css">
+        .table td  {
+             text-align: center;   
+             vertical-align:middle;
+             
+         }
+         .table th  {
+             text-align: center;   
+             vertical-align:middle;
+         }
+   </style>
+   <script>
+       function deleteitem(item){
+            console.log(item.id);
+            $.ajax({
+                url:"http://localhost:8080/v1/sort/"+item.id,
+                type:"delete",
+                success:function(result,status,xhr){
+                    if(status=="success"){
+                        refresh();
+                    }
+                }
+            })
+       }
+       function refresh(){
+        $.ajax({
+                url:'http://localhost:8080/v1/sort',
+                type:'get',
+                dataType:'json',
+                error:function(xhr,status,error){
+                    console.log(error);
+                    console.log(status);
+                },
+                success:function(result,status,xhr){
+                    if(status=="success"){
+                        $("#sortbody").empty();
+                        if(Array.isArray(result)){
+                            var count=0;
+                            result.forEach(function(item,index,array){
+                                $("#sortbody").append(
+                                    `<tr class="table-primary" >
+                                            <td>`+(count=count+1)+`</td>
+                                            <td>`+item["Name"]+`</td>
+                                            <td>`+item["Detail"]+`</td>
+                                            <td><button id="`+item["Id"]+`"type="button" class="btn btn-link text-warning" onclick="deleteitem(this)"  >删除</button></td>
+                                    </tr>`
+                                );
+                               
+                                console.log(item["Name"]+item["Detail"]+""+index+""+array);
+                            });
+                        }
+                        
+                        // var returndata= JSON.parse(result);
+                        // console.log(returndata);
+                    }
+                }
+            });
+       }
+        $(document).ready(function(){
+
+
+           refresh();
+
+            $("#postsort").click(function(){
+                var typedetail=$("#typedetail").val();
+                var typename=$("#typename").val();
+                if(typedetail!=null&&typename!=null){
+                    $.ajax({
+                    url:'http://localhost:8080/v1/sort',
+                    type:'post',
+                    success:function(data){
+                        refresh();
+                        //console.log(data.msg);
+                    },
+                    contentType:"application/json;charset=utf-8",
+                    data:JSON.stringify( {
+                        Detail:typedetail,
+                        Name:typename,
+                        Id:0
+                        })
+                    });
+                }
+               
+            });
+        });
+    </script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <!-- Brand -->
+  <a class="navbar-brand" href="#">LOGO</a>
+
+  <!-- Links -->
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">首页</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            AR内容管理
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="arlist.html">AR 内容列表</a>
+            <a class="dropdown-item" href="addartarget.html">添加新AR</a>
+            <a class="dropdown-item" href="typemana.html">分类管理</a>
+            <a class="dropdown-item" href="brandmana.html">品牌管理</a>
+          </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">数据统计</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">用户管理</a>
+      </li>
+  </ul>
+</nav>
+<br>
+<div class="container">
+        <div class ="row">
+                <div class="col-6">
+                        <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover ">
+                                    <thead>
+                                        <tr class="table-light">
+                                        <th>序号</th>
+                                        <th>分类名称</th>
+                                        <th>分类说明</th>
+                                        <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sortbody">
+                                       
+                                    </tbody>
+                                </table>
+                        </div>
+                </div>
+                <div class="col-2">
+
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">添加新分类</div>
+                        <div class="card-body">
+                                <form>
+                                    <div class="form-group">
+                                        <label for="typename">分类名称</label>
+                                        <input type="text" class="form-control" id="typename">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="typedetail">分类说明</label>
+                                        <textarea class="form-control" rows="5" id="typedetail"></textarea>
+                                    </div>
+                                    <button id="postsort" type="button" class="btn btn-primary btn-block">提交保存</button>
+                                </form>    
+                        </div> 
+                        
+                    </div>
+                </div>
+          </div>
+</div>
+
+
+</body>
+</html>
